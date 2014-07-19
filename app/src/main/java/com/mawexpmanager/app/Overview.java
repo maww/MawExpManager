@@ -5,11 +5,14 @@ import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,8 +20,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.CursorTreeAdapter;
 import android.widget.ExpandableListView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -27,15 +33,11 @@ public class Overview extends ActionBarActivity implements LoaderManager.LoaderC
     private TextView tv_costSum;
     private TextView tv_currentMonth;
     private ExpandableListView elv;
-    //private DbProvider dbAdapter;
-    //private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-    //private DecimalFormat df = new DecimalFormat("#,###,###");
     private int monthlySum = 0;
 
     private ExpandableAdapter adapter;
 
-
-    public void findViews() {
+    private void findViews() {
         tv_costSum = (TextView) findViewById(R.id.costSum);
         tv_currentMonth = (TextView) findViewById(R.id.currentMonth);
         elv = (ExpandableListView) findViewById(R.id.overview_elv);
@@ -57,19 +59,13 @@ public class Overview extends ActionBarActivity implements LoaderManager.LoaderC
             public boolean onChildClick(ExpandableListView parents,View v,int groupPosition,int childPosition,long id){
                 //.d("id",String.valueOf(id));
                 Uri uri=Uri.parse(DbProvider.CONTENT_URI+"/"+id);
-                Intent intent=new Intent(Overview.this,AddExpense.class);
+                Intent intent=new Intent(Overview.this,EditBill.class);
                 intent.putExtra(DbProvider.CONTENT_ITEM_TYPE,uri);
                 startActivity(intent);
                 return false;
             }
         });
     }
-
-    /*@Override
-    protected void onResume(){
-        super.onResume();
-        getLoaderManager().restartLoader(-2,null,this);
-    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -86,11 +82,13 @@ public class Overview extends ActionBarActivity implements LoaderManager.LoaderC
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_new) {
-            Intent intent = new Intent(Overview.this, AddExpense.class);
+            Intent intent = new Intent(Overview.this, EditBill.class);
             startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }
+
+
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args){
@@ -135,11 +133,12 @@ public class Overview extends ActionBarActivity implements LoaderManager.LoaderC
             case -2:
                 data.moveToFirst();
                 adapter.setGroupCursor(data);
-                //Log.d("groupCursor",(loader==null)?"=null":"=loadFinished");
                 break;
             default:
                 data.moveToFirst();
-                adapter.setChildrenCursor(loader.getId(),data);
+                if(adapter.getGroup(loader.getId())!=null) {
+                    adapter.setChildrenCursor(loader.getId(), data);
+                }
         }
     }
 
@@ -153,7 +152,7 @@ public class Overview extends ActionBarActivity implements LoaderManager.LoaderC
                 adapter.setGroupCursor(null);
                 break;
             default:
-                if(loader!=null) {
+                if(adapter.getGroup(loader.getId())!=null) {
                     adapter.setChildrenCursor(loader.getId(), null);
                 }
         }
