@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <CalendarView android:id="@+id/dialog_calendar"
+        android:layout_width="match_parent"
+        android:layout_height="275dp"
+        android:maxDate="01/01/2015"
+        android:minDate="01/01/2013"
+        android:showWeekNumber="false"
+        />
+
+</LinearLayout>
